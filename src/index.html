@@ -4,12 +4,27 @@
   <meta charset="UTF-8">
   <title>shri-multimedia</title>
   <link rel="stylesheet" href="style.css">
-  <link rel="preload" href="images/panorama.jpg" as="image">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
 </head>
 <body>
-  Hello
+  <div class="cameras">
+    <h1 class="cameras__title">Видеокамеры</h1>
+    <ul class="cameras__list">
+      <li class="cameras__item camera">
+        <video id="video-1" class="camera__video" muted autoplay></video>
+      </li>
+      <li class="cameras__item camera">
+        <video id="video-2" class="camera__video" muted autoplay></video>
+      </li>
+      <li class="cameras__item camera">
+        <video id="video-3" class="camera__video" muted autoplay></video>
+      </li>
+      <li class="cameras__item camera">
+        <video id="video-4" class="camera__video" muted autoplay></video>
+      </li>
+    </ul>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
