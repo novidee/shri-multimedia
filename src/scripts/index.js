@@ -1,4 +1,5 @@
 import Hls from 'hls.js';
+import '../styles/index.less';
 
 function initVideo(video, url) {
   if (Hls.isSupported()) {

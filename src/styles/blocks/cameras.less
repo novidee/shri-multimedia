@@ -1,0 +1,39 @@
+.cameras {
+  max-width: @desktop-width;
+  margin: 0 auto;
+  padding: 20px;
+
+  .tablet-up({
+    padding: 20px 40px 0;
+  });
+}
+
+.cameras__title {
+  margin: 0 0 20px;
+}
+
+.cameras__list {
+  display: grid;
+  grid-gap: 20px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+
+  .tablet-up({
+    grid-template-rows: repeat(2, 1fr);
+    grid-template-columns: repeat(2, 1fr);
+  });
+}
+
+.cameras__item {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 300px;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.86);
+
+  .tablet-up({
+    min-height: 400px;
+  });
+}

@@ -1,0 +1,17 @@
+.reset-list() {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tablet-up(@rules) {
+  @media (min-width: @tablet-width) {
+    @rules();
+  }
+}
+
+.desktop-up(@rules) {
+  @media (min-width: @desktop-width) {
+    @rules();
+  }
+}
