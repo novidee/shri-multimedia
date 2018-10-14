@@ -14,28 +14,6 @@ body {
   font-family: Arial, sans-serif;
   font-size: 15px;
   line-height: 1.6;
-
-  &::after {
-    content: "";
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: black;
-    opacity: 0;
-    transition: @fast-transition;
-    visibility: hidden;
-  }
-}
-
-.body--hidden {
-  overflow: hidden;
-
-  &::after {
-    opacity: 1;
-    visibility: visible;
-  }
 }
 
 @keyframes pop-in {

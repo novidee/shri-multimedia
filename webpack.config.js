@@ -1,6 +1,7 @@
 const path = require('path');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const autoprefixer = require('autoprefixer');
+const inputStyle = require('postcss-input-style');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
 const SOURCE_FOLDER = 'src';
@@ -17,7 +18,8 @@ module.exports = (env, argv) => {
       options: {
         ident: 'postcss',
         plugins: [
-          autoprefixer()
+          autoprefixer(),
+          inputStyle()
         ]
       }
     },

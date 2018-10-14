@@ -1,12 +1,8 @@
 .camera__container {
   position: relative;
-  transition: transform @fast-transition;
+  transition: transform @transition;
   font-size: 0;
   will-change: transform;
-
-  .tablet-up({
-    transition: transform @transition;
-  });
 }
 
 .camera__video {

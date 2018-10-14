@@ -7,7 +7,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="robots" content="noindex">
 </head>
-<body>
+<body class="full-screen">
   <div class="cameras">
     <h1 class="cameras__title">Видеокамеры</h1>
     <ul class="cameras__list">
@@ -33,12 +33,18 @@
       </li>
     </ul>
   </div>
-  <div class="modal modal--hidden">
-    <div class="modal__container" role="dialog">
-      <div class="controls">
-
+  <div class="controls">
+    <footer class="controls__footer">
+      <button class="controls__button button">Все камеры</button>
+      <div class="form-range">
+        <label for="brightness-control" class="form-range__label">Яркость</label>
+        <input id="brightness-control" class="form-range__control" type="range" />
       </div>
-    </div>
+      <div class="form-range">
+        <label for="contrast-control" class="form-range__label">Контраст</label>
+        <input id="contrast-control" class="form-range__control" type="range" />
+      </div>
+    </footer>
   </div>
   <script src="script.js"></script>
 </body>

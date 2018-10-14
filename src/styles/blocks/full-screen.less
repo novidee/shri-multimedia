@@ -1,0 +1,28 @@
+.full-screen {
+  &::after {
+    content: "";
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: black;
+    opacity: 0;
+    transition: @transition;
+    visibility: hidden;
+  }
+
+  &--opened {
+    overflow: hidden;
+
+    &::after {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .controls {
+      opacity: 1;
+      visibility: visible;
+    }
+  }
+}

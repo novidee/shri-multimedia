@@ -1,0 +1,38 @@
+.controls {
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  visibility: hidden;
+  transition: @transition;
+
+  &--opened {
+    .controls__footer {
+      transform: translate3d(0, 0, 0);
+    }
+  }
+}
+
+.controls__footer {
+  position: fixed;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 10px 20px;
+  width: 100%;
+  transition: @transition;
+  background: rgba(0, 0, 0, 0.7);
+  transform: translate3d(0, 100px, 0);
+
+  .tablet-up({
+    flex-direction: row;
+  });
+}
+
+.controls__button {
+  margin-right: auto;
+  margin-bottom: 20px;
+
+  .tablet-up({
+    margin: 0 40px 0 0;
+  });
+}

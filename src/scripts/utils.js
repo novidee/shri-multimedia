@@ -1,5 +1,5 @@
 const getTransformToCenter = (node) => {
-  const { clientWidth, clientHeight, scrollTop } = document.documentElement;
+  const { clientWidth, clientHeight } = document.documentElement;
   const viewportCenter = {
     x: clientWidth / 2,
     y: clientHeight / 2
@@ -10,6 +10,8 @@ const getTransformToCenter = (node) => {
     x: node.offsetLeft + nodeWidth / 2,
     y: node.offsetTop + nodeHeight / 2
   };
+
+  const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
 
   return {
     x: viewportCenter.x - nodeCenter.x,

@@ -14,7 +14,7 @@ class Cameras {
 
   onTransitionEnd(event) {
     const isCameraOpen = this.camerasInfo[event.target.closest('.camera').dataset.id].isOpen;
-
+    console.log('dasdad', isCameraOpen);
     if (!isCameraOpen && event.propertyName === 'transform') {
       event.target.style.zIndex = 0;
     }
@@ -46,7 +46,8 @@ class Cameras {
 
     const isCameraOpen = this.camerasInfo[camera.dataset.id].isOpen;
 
-    document.body.classList.toggle('body--hidden');
+    document.querySelector('.full-screen').classList.toggle('full-screen--opened');
+    document.querySelector('.controls').classList.toggle('controls--opened');
 
     const transform = getTransformToCenter(videoContainer);
 
