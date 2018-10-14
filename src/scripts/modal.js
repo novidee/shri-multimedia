@@ -1,6 +1,7 @@
+import update from 'immutability-helper';
 import { getTransformToCenter } from './utils';
 
-const CAMERA_STATE = {
+const CAMERA_DEFAULT_STATE = {
   style: {
     x: 0,
     y: 0,
@@ -33,13 +34,14 @@ class Cameras {
     const cameras = Array.from(document.querySelectorAll('.camera'));
 
     this.camerasInfo = cameras.reduce(
-      (info, camera) => Object.assign(info, { [camera.dataset.id]: Object.assign({}, CAMERA_STATE, {
+      (info, camera) => Object.assign(info, { [camera.dataset.id]: Object.assign({}, CAMERA_DEFAULT_STATE, {
         cameraNode: camera,
         videoContainerNode: camera.querySelector('.camera__container')
       }) }), {}
     );
 
     this.subscribe();
+    this.render();
   }
 
   subscribe() {
@@ -51,6 +53,23 @@ class Cameras {
 
     const closeButton = document.querySelector('.controls__button');
     closeButton.addEventListener('click', this.onFullScreenClose);
+
+    const brightnessControl = document.querySelector('#brightness-control');
+    brightnessControl.addEventListener('input', this.onStyleChange('brightness'));
+
+    const contrastControl = document.querySelector('#contrast-control');
+    contrastControl.addEventListener('input', this.onStyleChange('contrast'));
+  }
+
+  onStyleChange(field) {
+    return event => {
+      this.fieldChange(field, event.target.value);
+      this.render();
+    };
+  }
+
+  fieldChange(field, value) {
+    this.camerasInfo[this.openedCamera].style[field] = value;
   }
 
   onFullScreenClose() {
@@ -73,19 +92,23 @@ class Cameras {
     const { openedCamera, camerasInfo } = this;
     const hasOpenedCamera = Boolean(openedCamera);
 
-    document.querySelector('.full-screen').classList.remove('full-screen--opened');
-    document.querySelector('.controls').classList.remove('controls--opened');
-
     Object.values(camerasInfo).forEach((info) => {
-      const { x, y, scale, zIndex } = info.style;
+      const { x, y, scale, zIndex, brightness, contrast } = info.style;
 
       info.videoContainerNode.style.zIndex = zIndex;
       info.videoContainerNode.style.transform = `translate3d(${x}px, ${y}px, 0px) scale(${scale})`;
+      info.videoContainerNode.style.filter = `brightness(${brightness}) contrast(${contrast})`;
     });
 
     if (hasOpenedCamera) {
       document.querySelector('.full-screen').classList.add('full-screen--opened');
       document.querySelector('.controls').classList.add('controls--opened');
+
+      const brightnessControl = document.querySelector('#brightness-control');
+      const contrastControl = document.querySelector('#contrast-control');
+
+      brightnessControl.value = camerasInfo[openedCamera].style.brightness;
+      contrastControl.value = camerasInfo[openedCamera].style.contrast;
     } else {
       document.querySelector('.full-screen').classList.remove('full-screen--opened');
       document.querySelector('.controls').classList.remove('controls--opened');
@@ -97,10 +120,14 @@ class Cameras {
   }
 
   closeCamera(cameraId) {
-    this.camerasInfo[cameraId] = Object.assign(this.camerasInfo[cameraId], {
+    this.camerasInfo[cameraId] = update(this.camerasInfo[cameraId], {
       style: {
-        ...CAMERA_STATE.style,
-        zIndex: 1
+        $merge: {
+          x: 0,
+          y: 0,
+          scale: 1,
+          zIndex: 1
+        }
       }
     });
   }
@@ -110,9 +137,11 @@ class Cameras {
     const containerNode = camerasInfo[cameraId].videoContainerNode;
 
     const { x, y, scale } = getTransformToCenter(containerNode);
-    this.camerasInfo[cameraId] = Object.assign(this.camerasInfo[cameraId], {
+    this.camerasInfo[cameraId] = update(this.camerasInfo[cameraId], {
       style: {
-        x, y, scale, zIndex: 1
+        $merge: {
+          x, y, scale, zIndex: 1
+        }
       }
     });
   }
