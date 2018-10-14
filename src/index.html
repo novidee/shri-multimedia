@@ -11,24 +11,32 @@
   <div class="cameras">
     <h1 class="cameras__title">Видеокамеры</h1>
     <ul class="cameras__list">
-      <li class="cameras__item camera">
-        <video id="video-1" class="camera__video" muted autoplay></video>
+      <li class="cameras__item camera" data-id="neighbour">
+        <div class="camera__container">
+          <video id="video-1" class="camera__video" muted autoplay></video>
+        </div>
       </li>
-      <li class="cameras__item camera">
-        <video id="video-2" class="camera__video" muted autoplay></video>
+      <li class="cameras__item camera" data-id="cat">
+        <div class="camera__container">
+          <video id="video-2" class="camera__video" muted autoplay></video>
+        </div>
       </li>
-      <li class="cameras__item camera">
-        <video id="video-3" class="camera__video" muted autoplay></video>
+      <li class="cameras__item camera" data-id="dog">
+        <div class="camera__container">
+          <video id="video-3" class="camera__video" muted autoplay></video>
+        </div>
       </li>
-      <li class="cameras__item camera">
-        <video id="video-4" class="camera__video" muted autoplay></video>
+      <li class="cameras__item camera" data-id="hall">
+        <div class="camera__container">
+          <video id="video-4" class="camera__video" muted autoplay></video>
+        </div>
       </li>
     </ul>
   </div>
   <div class="modal modal--hidden">
     <div class="modal__container" role="dialog">
-      <div class="modal__content">
-        modal
+      <div class="controls">
+
       </div>
     </div>
   </div>

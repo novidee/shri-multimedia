@@ -1,4 +1,5 @@
 import Hls from 'hls.js';
+import modal from './modal';
 import '../styles/index.less';
 
 function initVideo(video, url) {

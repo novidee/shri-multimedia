@@ -1,39 +1,73 @@
-const layout = document.querySelector('.layout');
-const modal = document.querySelector('.modal');
-const cameras = document.querySelector('.camera');
+import { getTransformToCenter } from './utils';
 
-cameras.forEach(camera => camera.addEventListener('click', onModalToggle));
+const CAMERA_STATE = {
+  isOpen: false
+};
 
-function onModalClose(event) {
-  if (event.target !== this) return;
+class Cameras {
+  constructor() {
+    this.camerasInfo = {};
 
-  onModalToggle(event, this.closest('.modal').dataset.type);
+    this.onFullScreenOpen = this.onFullScreenOpen.bind(this);
+    this.onTransitionEnd = this.onTransitionEnd.bind(this);
+  }
+
+  onTransitionEnd(event) {
+    const isCameraOpen = this.camerasInfo[event.target.closest('.camera').dataset.id].isOpen;
+
+    if (!isCameraOpen && event.propertyName === 'transform') {
+      event.target.style.zIndex = 0;
+    }
+  }
+
+  init() {
+    const cameras = document.querySelectorAll('.camera');
+
+    this.camerasInfo = Array.from(cameras).reduce(
+      (info, camera) => Object.assign(info, { [camera.dataset.id]: CAMERA_STATE }), {}
+    );
+
+    this.subscribe();
+  }
+
+  subscribe() {
+    const cameras = document.querySelectorAll('.camera');
+    cameras.forEach(camera => camera.addEventListener('click', this.onFullScreenOpen));
+
+    const videoContainers = document.querySelectorAll('.camera__container');
+    videoContainers.forEach(container => container.addEventListener('transitionend', this.onTransitionEnd));
+  }
+
+  onFullScreenOpen(event) {
+    event.preventDefault();
+
+    const camera = event.target.closest('.camera');
+    const videoContainer = camera.querySelector('.camera__container');
+
+    const isCameraOpen = this.camerasInfo[camera.dataset.id].isOpen;
+
+    document.body.classList.toggle('body--hidden');
+
+    const transform = getTransformToCenter(videoContainer);
+
+    if (!isCameraOpen) {
+      videoContainer.style.zIndex = 1;
+      videoContainer.style.transform = `
+      translate3d(${transform.x}px, ${transform.y}px, 0px) scale(${transform.scale})
+    `;
+    } else {
+      videoContainer.style.transform = `
+      translate3d(${0}px, ${0}px, 0px) scale(${1})
+    `;
+    }
+
+    this.toggleCamera(camera.dataset.id);
+  }
+
+  toggleCamera(id) {
+    this.camerasInfo[id].isOpen = !this.camerasInfo[id].isOpen;
+  }
 }
 
-function onModalToggle(event) {
-  event.preventDefault();
-
-  const hiddenClass = 'modal--hidden';
-  const hasModalOpen = modal.classList.contains(hiddenClass);
-
-  if (hasModalOpen) animateModal(event);
-
-  document.body.classList.toggle('no-overflow');
-  modal.classList.toggle(hiddenClass);
-  modal.classList.toggle('modal--opened');
-
-  layout.classList.toggle('layout--with-modal');
-}
-
-function animateModal(event) {
-  const { top, left, width, height } = event.target.closest('.card').getBoundingClientRect();
-  const { clientWidth, clientHeight } = document.documentElement;
-
-  const centerX = clientWidth / 2;
-  const centerY = clientHeight / 2;
-
-  const resultLeft = left + (width / 2) - centerX;
-  const resultTop = top + (height / 2) - centerY;
-
-  document.documentElement.style.setProperty('--modal-start-transform', `translate(${resultLeft}px, ${resultTop}px) scale(0.2)`);
-}
+const cameras = new Cameras();
+cameras.init();
