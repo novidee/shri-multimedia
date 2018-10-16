@@ -1,5 +1,6 @@
 import update from 'immutability-helper';
 import { getTransformToCenter } from './utils';
+import analyser from './audio-analyser';
 
 const CAMERA_DEFAULT_STATE = {
   style: {
@@ -11,6 +12,9 @@ const CAMERA_DEFAULT_STATE = {
     contrast: 1
   }
 };
+
+const canvas = document.querySelector('#analyser');
+const context = canvas.getContext('2d');
 
 class Cameras {
   constructor() {
@@ -34,10 +38,13 @@ class Cameras {
     const cameras = Array.from(document.querySelectorAll('.camera'));
 
     this.camerasInfo = cameras.reduce(
-      (info, camera) => Object.assign(info, { [camera.dataset.id]: Object.assign({}, CAMERA_DEFAULT_STATE, {
-        cameraNode: camera,
-        videoContainerNode: camera.querySelector('.camera__container')
-      }) }), {}
+      (info, camera) => Object.assign(info, {
+        [camera.dataset.id]: Object.assign({}, CAMERA_DEFAULT_STATE, {
+          cameraNode: camera,
+          videoContainerNode: camera.querySelector('.camera__container'),
+          videoNode: camera.querySelector('video')
+        })
+      }), {}
     );
 
     this.subscribe();
@@ -62,7 +69,7 @@ class Cameras {
   }
 
   onStyleChange(field) {
-    return event => {
+    return (event) => {
       this.fieldChange(field, event.target.value);
       this.render();
     };
@@ -73,8 +80,12 @@ class Cameras {
   }
 
   onFullScreenClose() {
+    this.camerasInfo[this.openedCamera].videoNode.muted = true;
     this.closeCamera(this.openedCamera);
     this.toggleFullScreen();
+
+    this.turnOffAnalyser();
+
     this.render();
   }
 
@@ -82,10 +93,42 @@ class Cameras {
     event.preventDefault();
 
     const camera = event.target.closest('.camera');
+    const cameraId = camera.dataset.id;
 
-    this.toggleFullScreen(camera.dataset.id);
-    this.openCamera(camera.dataset.id);
+    this.turnOffAnalyser = analyser.createSource({
+      source: this.camerasInfo[cameraId].videoNode,
+      sourceId: cameraId,
+      onProcess: this.onProcess
+    });
+
+    this.camerasInfo[cameraId].videoNode.muted = false;
+
+    this.toggleFullScreen(cameraId);
+    this.openCamera(cameraId);
     this.render();
+  }
+
+  onProcess(data) {
+    const MAX_FREQUENCY = 255;
+    const { width, height } = canvas;
+    context.clearRect(0, 0, width, height);
+
+    context.fillStyle = 'transparent';
+    context.fillRect(0, 0, width, height);
+
+    const barWidth = (width / data.length);
+    let barHeight;
+    let x = 0;
+    let y = 0;
+
+    context.fillStyle = '#ffd93e';
+
+    data.forEach((bar, index) => {
+      barHeight = bar / MAX_FREQUENCY * height;
+      x = barWidth * index;
+      y = height - barHeight;
+      context.fillRect(x, y, barWidth, barHeight);
+    });
   }
 
   render() {
@@ -148,4 +191,5 @@ class Cameras {
 }
 
 const cameras = new Cameras();
+analyser.init();
 cameras.init();
