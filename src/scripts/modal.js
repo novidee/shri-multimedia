@@ -1,49 +1,47 @@
-import update from 'immutability-helper';
-import { getTransformToCenter } from './utils';
 import analyser from './audio-analyser';
-
-const CAMERA_DEFAULT_STATE = {
-  style: {
-    x: 0,
-    y: 0,
-    scale: 1,
-    zIndex: 0,
-    brightness: 1,
-    contrast: 1
-  }
-};
+import Camera from './camera';
 
 const canvas = document.querySelector('#analyser');
 const context = canvas.getContext('2d');
 
+const SELECTORS = {
+  camera: '.camera',
+  cameraContainer: '.camera__container',
+  controlsButton: '.controls__button',
+  brightnessControl: '#brightness-control',
+  contrastControl: '#contrast-control',
+  fullScreen: '.full-screen',
+  controls: '.controls'
+};
+
+const NODES = {
+  brightnessControl: document.querySelector(SELECTORS.brightnessControl),
+  contrastControl: document.querySelector(SELECTORS.contrastControl),
+  cameras: document.querySelectorAll(SELECTORS.camera),
+  fullScreen: document.querySelector(SELECTORS.fullScreen),
+  controls: document.querySelector(SELECTORS.controls)
+};
+
 class Cameras {
   constructor() {
-    this.camerasInfo = {};
+    this.cameras = {};
     this.openedCamera = null;
 
-    this.onFullScreenOpen = this.onFullScreenOpen.bind(this);
-    this.onFullScreenClose = this.onFullScreenClose.bind(this);
+    this.closeCamera = cameraId => this.cameras[cameraId].close();
+    this.openCamera = cameraId => this.cameras[cameraId].open();
+    this.toggleFullScreen = (cameraId = null) => { this.openedCamera = cameraId; };
+
+    this.onCameraClick = this.onCameraClick.bind(this);
+    this.onCloseClick = this.onCloseClick.bind(this);
     this.onTransitionEnd = this.onTransitionEnd.bind(this);
   }
 
-  onTransitionEnd(event) {
-    const cameraId = event.target.closest('.camera').dataset.id;
-    const isCameraOpen = cameraId === this.openedCamera;
-    if (!isCameraOpen && event.propertyName === 'transform') {
-      this.camerasInfo[cameraId].style.zIndex = 0;
-    }
-  }
-
   init() {
-    const cameras = Array.from(document.querySelectorAll('.camera'));
+    const cameras = Array.from(NODES.cameras);
 
-    this.camerasInfo = cameras.reduce(
-      (info, camera) => Object.assign(info, {
-        [camera.dataset.id]: Object.assign({}, CAMERA_DEFAULT_STATE, {
-          cameraNode: camera,
-          videoContainerNode: camera.querySelector('.camera__container'),
-          videoNode: camera.querySelector('video')
-        })
+    this.cameras = cameras.reduce(
+      (info, cameraNode) => Object.assign(info, {
+        [cameraNode.dataset.id]: new Camera(cameraNode)
       }), {}
     );
 
@@ -52,35 +50,36 @@ class Cameras {
   }
 
   subscribe() {
-    const cameras = document.querySelectorAll('.camera');
-    cameras.forEach(camera => camera.addEventListener('click', this.onFullScreenOpen));
+    NODES.cameras.forEach(camera => camera.addEventListener('click', this.onCameraClick));
 
-    const videoContainers = document.querySelectorAll('.camera__container');
+    const videoContainers = document.querySelectorAll(SELECTORS.cameraContainer);
     videoContainers.forEach(container => container.addEventListener('transitionend', this.onTransitionEnd));
 
-    const closeButton = document.querySelector('.controls__button');
-    closeButton.addEventListener('click', this.onFullScreenClose);
+    const closeButton = document.querySelector(SELECTORS.controlsButton);
+    closeButton.addEventListener('click', this.onCloseClick);
 
-    const brightnessControl = document.querySelector('#brightness-control');
-    brightnessControl.addEventListener('input', this.onStyleChange('brightness'));
-
-    const contrastControl = document.querySelector('#contrast-control');
-    contrastControl.addEventListener('input', this.onStyleChange('contrast'));
+    NODES.brightnessControl.addEventListener('input', this.onControlChange('brightness'));
+    NODES.contrastControl.addEventListener('input', this.onControlChange('contrast'));
   }
 
-  onStyleChange(field) {
+  onTransitionEnd(event) {
+    const cameraId = event.target.closest(SELECTORS.camera).dataset.id;
+    const isCameraOpen = cameraId === this.openedCamera;
+    if (!isCameraOpen && event.propertyName === 'transform') {
+      this.cameras[cameraId].putDown();
+      this.render();
+    }
+  }
+
+  onControlChange(field) {
     return (event) => {
-      this.fieldChange(field, event.target.value);
+      const { cameras, openedCamera } = this;
+      cameras[openedCamera].styleChange(field, event.target.value);
       this.render();
     };
   }
 
-  fieldChange(field, value) {
-    this.camerasInfo[this.openedCamera].style[field] = value;
-  }
-
-  onFullScreenClose() {
-    this.camerasInfo[this.openedCamera].videoNode.muted = true;
+  onCloseClick() {
     this.closeCamera(this.openedCamera);
     this.toggleFullScreen();
 
@@ -89,19 +88,15 @@ class Cameras {
     this.render();
   }
 
-  onFullScreenOpen(event) {
-    event.preventDefault();
-
-    const camera = event.target.closest('.camera');
+  onCameraClick(event) {
+    const camera = event.target.closest(SELECTORS.camera);
     const cameraId = camera.dataset.id;
 
     this.turnOffAnalyser = analyser.createSource({
-      source: this.camerasInfo[cameraId].videoNode,
+      source: this.cameras[cameraId].videoNode,
       sourceId: cameraId,
       onProcess: this.onProcess
     });
-
-    this.camerasInfo[cameraId].videoNode.muted = false;
 
     this.toggleFullScreen(cameraId);
     this.openCamera(cameraId);
@@ -132,61 +127,19 @@ class Cameras {
   }
 
   render() {
-    const { openedCamera, camerasInfo } = this;
+    const { openedCamera, cameras } = this;
     const hasOpenedCamera = Boolean(openedCamera);
 
-    Object.values(camerasInfo).forEach((info) => {
-      const { x, y, scale, zIndex, brightness, contrast } = info.style;
+    Object.values(cameras).forEach(camera => camera.render());
 
-      info.videoContainerNode.style.zIndex = zIndex;
-      info.videoContainerNode.style.transform = `translate3d(${x}px, ${y}px, 0px) scale(${scale})`;
-      info.videoContainerNode.style.filter = `brightness(${brightness}) contrast(${contrast})`;
-    });
+    const classAction = hasOpenedCamera ? 'add' : 'remove';
+    NODES.fullScreen.classList[classAction]('full-screen--opened');
+    NODES.controls.classList[classAction]('controls--opened');
 
     if (hasOpenedCamera) {
-      document.querySelector('.full-screen').classList.add('full-screen--opened');
-      document.querySelector('.controls').classList.add('controls--opened');
-
-      const brightnessControl = document.querySelector('#brightness-control');
-      const contrastControl = document.querySelector('#contrast-control');
-
-      brightnessControl.value = camerasInfo[openedCamera].style.brightness;
-      contrastControl.value = camerasInfo[openedCamera].style.contrast;
-    } else {
-      document.querySelector('.full-screen').classList.remove('full-screen--opened');
-      document.querySelector('.controls').classList.remove('controls--opened');
+      NODES.brightnessControl.value = cameras[openedCamera].style.brightness;
+      NODES.contrastControl.value = cameras[openedCamera].style.contrast;
     }
-  }
-
-  toggleFullScreen(cameraId = null) {
-    this.openedCamera = cameraId;
-  }
-
-  closeCamera(cameraId) {
-    this.camerasInfo[cameraId] = update(this.camerasInfo[cameraId], {
-      style: {
-        $merge: {
-          x: 0,
-          y: 0,
-          scale: 1,
-          zIndex: 1
-        }
-      }
-    });
-  }
-
-  openCamera(cameraId) {
-    const { camerasInfo } = this;
-    const containerNode = camerasInfo[cameraId].videoContainerNode;
-
-    const { x, y, scale } = getTransformToCenter(containerNode);
-    this.camerasInfo[cameraId] = update(this.camerasInfo[cameraId], {
-      style: {
-        $merge: {
-          x, y, scale, zIndex: 1
-        }
-      }
-    });
   }
 }
 
