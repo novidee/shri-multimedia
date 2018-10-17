@@ -63,6 +63,14 @@ class Camera {
   unMute() {
     this.videoNode.muted = false;
   }
+
+  hide() {
+    this.videoContainerNode.style.visibility = 'hidden';
+  }
+
+  show() {
+    this.videoContainerNode.style.visibility = 'visible';
+  }
 }
 
 export default Camera;

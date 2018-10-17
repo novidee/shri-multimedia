@@ -3,7 +3,7 @@ import { calculateLightness } from './utils';
 
 class LightnessAnalyser {
   constructor() {
-    this.container = document.querySelector('.data');
+    this.container = document.querySelector('.lightness-analyser__value');
   }
 
   styleChange(field, value) {

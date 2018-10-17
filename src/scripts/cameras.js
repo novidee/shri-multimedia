@@ -1,7 +1,3 @@
-import AudioAnalyser from './audio-analyser';
-import LightnessAnalyser from './lightness-analyser';
-import MovementAnalyser from './movement-analyser';
-import volumeVisualizer from './volume-visualizer';
 import Camera from './camera';
 
 const SELECTORS = {
@@ -83,6 +79,7 @@ class Cameras {
 
   onCloseClick() {
     this.closeCamera(this.openedCamera);
+    this.showCameras(this.openedCamera);
     this.toggleFullScreen();
 
     this.analysers.forEach(analyser => analyser.stopAnalyse());
@@ -103,7 +100,20 @@ class Cameras {
 
     this.toggleFullScreen(cameraId);
     this.openCamera(cameraId);
+    this.hideCameras(cameraId);
     this.render();
+  }
+
+  hideCameras(cameraId) {
+    Object.values(this.cameras).forEach((camera) => {
+      if (camera.id !== cameraId) camera.hide();
+    });
+  }
+
+  showCameras(cameraId) {
+    Object.values(this.cameras).forEach((camera) => {
+      if (camera.id !== cameraId) camera.show();
+    });
   }
 
   render() {
@@ -123,20 +133,4 @@ class Cameras {
   }
 }
 
-const lightnessAnalyser = new LightnessAnalyser();
-const movementAnalyser = new MovementAnalyser();
-const audioAnalyser = new AudioAnalyser({
-  visualizers: [volumeVisualizer]
-});
-
-audioAnalyser.init();
-
-const cameras = new Cameras({
-  analysers: [
-    audioAnalyser,
-    lightnessAnalyser,
-    movementAnalyser
-  ]
-});
-
-cameras.init();
+export default Cameras;
