@@ -1,5 +1,5 @@
-import videoCanvas from './canvas';
-import { calculateLightness } from './utils';
+import videoCanvas from '../canvas';
+import { calculateLightness } from '../utils';
 
 class LightnessAnalyser {
   constructor() {

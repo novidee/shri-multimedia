@@ -1,10 +1,8 @@
 import Hls from 'hls.js';
 import Cameras from './cameras';
 import '../styles/index.less';
-import MovementAnalyser from './movement-analyser';
+import { AudioAnalyser, LightnessAnalyser, MovementAnalyser } from './analysers';
 import volumeVisualizer from './volume-visualizer';
-import AudioAnalyser from './audio-analyser';
-import LightnessAnalyser from './lightness-analyser';
 
 const VIDEO_URLS = [
   'http://localhost:9191/master?url=http%3A%2F%2Flocalhost%3A3102%2Fstreams%2Fsosed%2Fmaster.m3u8',

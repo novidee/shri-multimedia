@@ -1,5 +1,5 @@
-import videoCanvas from './canvas';
-import { throttle, calculateLightness } from './utils';
+import videoCanvas from '../canvas';
+import { throttle, calculateLightness } from '../utils';
 
 const DELTA = 50;
 const FRAMES_DELAY = 75;
