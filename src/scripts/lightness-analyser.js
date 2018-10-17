@@ -1,8 +1,8 @@
+import videoCanvas from './canvas';
+import { calculateLightness } from './utils';
+
 class LightnessAnalyser {
   constructor() {
-    this.canvas = document.createElement('canvas');
-    this.context = this.canvas.getContext('2d');
-
     this.container = document.querySelector('.data');
   }
 
@@ -10,38 +10,30 @@ class LightnessAnalyser {
     this[field] = Number(value);
   }
 
-  analyse(video) {
-    const { canvas, context } = this;
-    const { clientWidth, clientHeight } = video;
+  analyse({ source }) {
+    this.unsubscribe = videoCanvas.subscribe((imageData) => {
+      this.draw(source, imageData);
+    });
 
-    canvas.width = clientWidth;
-    canvas.height = clientHeight;
-    this.draw(video, context, clientWidth, clientHeight);
+    videoCanvas.setSource(source);
   }
 
   stopAnalyse() {
-    cancelAnimationFrame(this.animationFrameId);
+    videoCanvas.stopDraw();
+    this.unsubscribe();
   }
 
-  draw(video, canvas, width, height) {
+  draw(video, imageData) {
     if (video.paused || video.ended) return;
-    canvas.drawImage(video, 0, 0, width, height);
 
-    const { data } = canvas.getImageData(0, 0, width, height);
+    const pixels = imageData.data;
 
     let sum = 0;
-    for (let i = 0; i < data.length; i += 4) {
-      const r = data[i];
-      const g = data[i + 1];
-      const b = data[i + 2];
-      sum += (r + g + b) / 3;
+    for (let i = 0; i < pixels.length; i += 4) {
+      sum += calculateLightness(pixels, i);
     }
 
-    this.container.innerHTML = Math.round((sum / (data.length / 4)) * 100 / 255);
-
-    this.animationFrameId = requestAnimationFrame(() => {
-      this.draw(video, canvas, width, height);
-    });
+    this.container.innerHTML = Math.round((sum / (pixels.length / 4)) * 100 / 255);
   }
 }
 

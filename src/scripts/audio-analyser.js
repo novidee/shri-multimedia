@@ -29,7 +29,7 @@ class AudioAnalyser {
     this.processor = this.context.createScriptProcessor(0, 1, 1);
   }
 
-  createSource({ source, sourceId }) {
+  analyse({ source, sourceId }) {
     const { analyser, processor, context, visualizers } = this;
 
     this.sources[sourceId] = this.sources[sourceId]
@@ -48,7 +48,7 @@ class AudioAnalyser {
       visualizers.forEach(visualizer => visualizer.visualize(frequencies));
     };
 
-    return () => {
+    this.stopAnalyse = () => {
       currentSource.disconnect(analyser);
       analyser.disconnect(processor);
       processor.disconnect(context.destination);
