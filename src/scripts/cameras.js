@@ -1,4 +1,5 @@
-import Analyser from './audio-analyser';
+import AudioAnalyser from './audio-analyser';
+import LightnessAnalyser from './lightness-analyser';
 import volumeVisualizer from './volume-visualizer';
 import Camera from './camera';
 
@@ -21,10 +22,11 @@ const NODES = {
 };
 
 class Cameras {
-  constructor({ audioAnalyser }) {
+  constructor({ audioAnalyser, lightnessAnalyser }) {
     this.cameras = {};
     this.openedCamera = null;
     this.audioAnalyser = audioAnalyser;
+    this.lightnessAnalyser = lightnessAnalyser;
 
     this.closeCamera = cameraId => this.cameras[cameraId].close();
     this.openCamera = cameraId => this.cameras[cameraId].open();
@@ -74,6 +76,7 @@ class Cameras {
     return (event) => {
       const { cameras, openedCamera } = this;
       cameras[openedCamera].styleChange(field, event.target.value);
+
       this.render();
     };
   }
@@ -83,6 +86,8 @@ class Cameras {
     this.toggleFullScreen();
 
     this.turnOffAnalyser();
+
+    this.lightnessAnalyser.stopAnalyse();
 
     this.render();
   }
@@ -95,6 +100,8 @@ class Cameras {
       source: this.cameras[cameraId].videoNode,
       sourceId: cameraId
     });
+
+    this.lightnessAnalyser.analyse(this.cameras[cameraId].videoNode);
 
     this.toggleFullScreen(cameraId);
     this.openCamera(cameraId);
@@ -118,14 +125,17 @@ class Cameras {
   }
 }
 
-const analyser = new Analyser({
+const audioAnalyser = new AudioAnalyser({
   visualizers: [volumeVisualizer]
 });
 
-analyser.init();
+const lightnessAnalyser = new LightnessAnalyser();
+
+audioAnalyser.init();
 
 const cameras = new Cameras({
-  audioAnalyser: analyser
+  audioAnalyser,
+  lightnessAnalyser
 });
 
 cameras.init();
