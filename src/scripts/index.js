@@ -1,5 +1,5 @@
 import Hls from 'hls.js';
-import modal from './modal';
+import cameras from './cameras';
 import '../styles/index.less';
 
 function initVideo(video, url) {

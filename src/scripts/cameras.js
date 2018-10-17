@@ -1,8 +1,6 @@
-import analyser from './audio-analyser';
+import Analyser from './audio-analyser';
+import volumeVisualizer from './volume-visualizer';
 import Camera from './camera';
-
-const canvas = document.querySelector('#analyser');
-const context = canvas.getContext('2d');
 
 const SELECTORS = {
   camera: '.camera',
@@ -23,9 +21,10 @@ const NODES = {
 };
 
 class Cameras {
-  constructor() {
+  constructor({ audioAnalyser }) {
     this.cameras = {};
     this.openedCamera = null;
+    this.audioAnalyser = audioAnalyser;
 
     this.closeCamera = cameraId => this.cameras[cameraId].close();
     this.openCamera = cameraId => this.cameras[cameraId].open();
@@ -92,38 +91,14 @@ class Cameras {
     const camera = event.target.closest(SELECTORS.camera);
     const cameraId = camera.dataset.id;
 
-    this.turnOffAnalyser = analyser.createSource({
+    this.turnOffAnalyser = this.audioAnalyser.createSource({
       source: this.cameras[cameraId].videoNode,
-      sourceId: cameraId,
-      onProcess: this.onProcess
+      sourceId: cameraId
     });
 
     this.toggleFullScreen(cameraId);
     this.openCamera(cameraId);
     this.render();
-  }
-
-  onProcess(data) {
-    const MAX_FREQUENCY = 255;
-    const { width, height } = canvas;
-    context.clearRect(0, 0, width, height);
-
-    context.fillStyle = 'transparent';
-    context.fillRect(0, 0, width, height);
-
-    const barWidth = (width / data.length);
-    let barHeight;
-    let x = 0;
-    let y = 0;
-
-    context.fillStyle = '#ffd93e';
-
-    data.forEach((bar, index) => {
-      barHeight = bar / MAX_FREQUENCY * height;
-      x = barWidth * index;
-      y = height - barHeight;
-      context.fillRect(x, y, barWidth, barHeight);
-    });
   }
 
   render() {
@@ -143,6 +118,14 @@ class Cameras {
   }
 }
 
-const cameras = new Cameras();
+const analyser = new Analyser({
+  visualizers: [volumeVisualizer]
+});
+
 analyser.init();
+
+const cameras = new Cameras({
+  audioAnalyser: analyser
+});
+
 cameras.init();

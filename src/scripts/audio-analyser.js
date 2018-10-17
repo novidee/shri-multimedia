@@ -1,9 +1,10 @@
 class AudioAnalyser {
-  constructor() {
+  constructor({ visualizers }) {
     this.context = new (window.AudioContext || window.webkitAudioContext)();
     this.processor = null;
     this.analyser = null;
     this.sources = {};
+    this.visualizers = visualizers;
   }
 
   init() {
@@ -28,8 +29,8 @@ class AudioAnalyser {
     this.processor = this.context.createScriptProcessor(0, 1, 1);
   }
 
-  createSource({ source, sourceId, onProcess }) {
-    const { analyser, processor, context } = this;
+  createSource({ source, sourceId }) {
+    const { analyser, processor, context, visualizers } = this;
 
     this.sources[sourceId] = this.sources[sourceId]
       || this.context.createMediaElementSource(source);
@@ -44,7 +45,7 @@ class AudioAnalyser {
     processor.onaudioprocess = () => {
       analyser.getByteFrequencyData(frequencies);
 
-      onProcess(frequencies);
+      visualizers.forEach(visualizer => visualizer.visualize(frequencies));
     };
 
     return () => {
@@ -55,4 +56,4 @@ class AudioAnalyser {
   }
 }
 
-export default new AudioAnalyser();
+export default AudioAnalyser;
