@@ -4,12 +4,12 @@ import videoCanvas from '../canvas';
 import { calculateLightness } from '../utils';
 
 class LightnessAnalyser implements IAnalyser {
-  constructor() {
-    this.container = document.querySelector('.lightness-analyser__value');
-  }
+  private container: HTMLElement;
+  private unsubscribe: () => void;
 
-  styleChange(field, value) {
-    this[field] = Number(value);
+  constructor() {
+    this.container = <HTMLInputElement>document.querySelector('.lightness-analyser__value');
+    this.unsubscribe = () => ({});
   }
 
   analyse({ source }: AnalyserParams) {
@@ -25,7 +25,7 @@ class LightnessAnalyser implements IAnalyser {
     this.unsubscribe();
   }
 
-  draw(video, imageData) {
+  draw(video: HTMLVideoElement, imageData: ImageData) {
     if (video.paused || video.ended) return;
 
     const pixels = imageData.data;
@@ -35,7 +35,9 @@ class LightnessAnalyser implements IAnalyser {
       sum += calculateLightness(pixels, i);
     }
 
-    this.container.innerHTML = Math.round((sum / (pixels.length / 4)) * 100 / 255);
+    const lightness = Math.round((sum / (pixels.length / 4)) * 100 / 255);
+
+    this.container.innerHTML = String(lightness);
   }
 }
 

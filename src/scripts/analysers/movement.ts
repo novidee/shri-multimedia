@@ -1,3 +1,4 @@
+import { AnalyserParams } from '../abstractions/types';
 import videoCanvas from '../canvas';
 import { throttle, calculateLightness } from '../utils';
 
@@ -5,18 +6,27 @@ const DELTA = 50;
 const FRAMES_DELAY = 75;
 
 class MovementAnalyser {
+  private readonly canvas: HTMLCanvasElement | null;
+  private readonly context: CanvasRenderingContext2D | null;
+  private prevImageData?: ImageData;
+  private unsubscribe: () => void;
+
   constructor() {
     this.canvas = document.querySelector('#movement-analyser');
-    this.context = this.canvas.getContext('2d');
+    this.context = this.canvas && this.canvas.getContext('2d');
 
-    this.prevImageData = null;
+    this.unsubscribe = () => ({});
 
     this.draw = this.draw.bind(this);
   }
 
-  analyse({ source }) {
+  analyse({ source }: AnalyserParams) {
+    if (!this.canvas) return;
+
+    if (!source || !source.parentElement) return;
+
     source.parentElement.appendChild(this.canvas);
-    this.canvas.style.zIndex = 2;
+    this.canvas.style.zIndex = '2';
 
     const { clientWidth, clientHeight } = source;
 
@@ -29,12 +39,14 @@ class MovementAnalyser {
   }
 
   stopAnalyse() {
-    this.canvas.style.zIndex = -1;
+    if (!this.canvas) return;
+
+    this.canvas.style.zIndex = '-1';
     videoCanvas.stopDraw();
     this.unsubscribe();
   }
 
-  draw(imageData, canvasWidth) {
+  draw(imageData: ImageData, canvasWidth: number) {
     if (!this.prevImageData) this.prevImageData = imageData;
 
     let firstPixel = 0;
@@ -63,9 +75,11 @@ class MovementAnalyser {
     this.drawIndicator(startX, startY, endX, endY);
   }
 
-  drawIndicator(startX, startY, endX, endY) {
+  drawIndicator(startX: number, startY: number, endX: number, endY: number) {
     const { context, canvas } = this;
-    this.context.strokeStyle = 'red';
+    if (!canvas || !context) return;
+
+    context.strokeStyle = 'red';
 
     context.clearRect(0, 0, canvas.width, canvas.height);
     context.beginPath();

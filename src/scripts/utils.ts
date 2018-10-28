@@ -30,15 +30,15 @@ const calculateLightness = (pixels: Uint8ClampedArray, index: number) => (
   (pixels[index] + pixels[index + 1] + pixels[index + 2]) / 3
 );
 
-const throttle = (func: () => void, ms: number) => {
+const throttle = (func: (...args: any[]) => void, ms: number) => {
   let isThrottled = false;
 
-  function wrapper() {
+  function wrapper(...args: any[]) {
     if (isThrottled) {
       return;
     }
 
-    func.apply(null);
+    func.apply(null, args);
 
     isThrottled = true;
 

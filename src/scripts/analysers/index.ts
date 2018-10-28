@@ -5,5 +5,5 @@ import MovementAnalyser from './movement';
 export {
   AudioAnalyser,
   LightnessAnalyser,
-  MovementAnalyser
+  MovementAnalyser,
 };
