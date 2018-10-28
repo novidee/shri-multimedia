@@ -1,20 +1,26 @@
-import { getTransformToCenter } from './utils';
+import { getTransformToCenter, generateId } from './utils';
+import { CameraStyle } from './abstractions/types';
 
 const CAMERA_DEFAULT_STYLE = {
   x: 0,
   y: 0,
   scale: 1,
-  zIndex: 0,
+  zIndex: '0',
   brightness: 1,
-  contrast: 1
+  contrast: 1,
 };
 
 class Camera {
-  constructor(node) {
+  private videoContainerNode: HTMLElement;
+  public videoNode: HTMLVideoElement;
+  public style: CameraStyle;
+  public readonly id: string;
+
+  constructor(node: HTMLVideoElement) {
     this.style = CAMERA_DEFAULT_STYLE;
-    this.id = node.dataset.id;
-    this.videoContainerNode = node.querySelector('.camera__container');
-    this.videoNode = node.querySelector('video');
+    this.id = node.dataset.id || generateId();
+    this.videoContainerNode = <HTMLElement>node.querySelector('.camera__container');
+    this.videoNode = <HTMLVideoElement>node.querySelector('video');
   }
 
   render() {
@@ -26,7 +32,7 @@ class Camera {
     videoContainerNode.style.filter = `brightness(${brightness}) contrast(${contrast})`;
   }
 
-  styleChange(field, value) {
+  styleChange(field: keyof CameraStyle, value: string) {
     this.style[field] = value;
   }
 
@@ -35,7 +41,7 @@ class Camera {
       x: 0,
       y: 0,
       scale: 1,
-      zIndex: 1
+      zIndex: 1,
     });
 
     this.mute();
@@ -46,14 +52,14 @@ class Camera {
 
     const { x, y, scale } = getTransformToCenter(videoContainerNode);
     this.style = Object.assign({}, this.style, {
-      x, y, scale, zIndex: 1
+      x, y, scale, zIndex: 1,
     });
 
     this.unMute();
   }
 
   putDown() {
-    this.style.zIndex = 0;
+    this.style.zIndex = '0';
   }
 
   mute() {

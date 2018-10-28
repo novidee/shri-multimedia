@@ -50,8 +50,11 @@ const throttle = (func: () => void, ms: number) => {
   return wrapper;
 };
 
+const generateId = () => '_' + Math.random().toString(36).substr(2, 9);
+
 export {
   getTransformToCenter,
   calculateLightness,
   throttle,
+  generateId,
 };

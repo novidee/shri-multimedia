@@ -1,7 +1,9 @@
+import { IAnalyser } from '../abstractions/interfaces';
+import { AnalyserParams } from '../abstractions/types';
 import videoCanvas from '../canvas';
 import { calculateLightness } from '../utils';
 
-class LightnessAnalyser {
+class LightnessAnalyser implements IAnalyser {
   constructor() {
     this.container = document.querySelector('.lightness-analyser__value');
   }
@@ -10,7 +12,7 @@ class LightnessAnalyser {
     this[field] = Number(value);
   }
 
-  analyse({ source }) {
+  analyse({ source }: AnalyserParams) {
     this.unsubscribe = videoCanvas.subscribe((imageData) => {
       this.draw(source, imageData);
     });

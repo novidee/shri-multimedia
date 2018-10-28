@@ -1,13 +1,21 @@
+import { ICallback } from './abstractions/interfaces';
+
 class VideoCanvas {
+  private readonly canvas: HTMLCanvasElement;
+  private readonly context: CanvasRenderingContext2D | null;
+  private source?: HTMLVideoElement;
+  private isDrawing: boolean;
+  private callbacks: ICallback[];
+  private animationFrameId?: number;
+
   constructor() {
     this.canvas = document.createElement('canvas');
     this.context = this.canvas.getContext('2d');
-    this.source = null;
     this.isDrawing = false;
     this.callbacks = [];
   }
 
-  setSource(source) {
+  setSource(source: HTMLVideoElement) {
     const { clientWidth, clientHeight } = source;
 
     this.source = source;
@@ -20,7 +28,7 @@ class VideoCanvas {
     }
   }
 
-  subscribe(callback) {
+  subscribe(callback: ICallback) {
     this.callbacks.push(callback);
 
     return () => {
@@ -29,11 +37,13 @@ class VideoCanvas {
   }
 
   draw() {
-    this.isDrawing = true;
-
     const { source, context, canvas, callbacks } = this;
-    context.drawImage(source, 0, 0, canvas.width, canvas.height);
+    if (!context) return;
+
+    context.drawImage(<CanvasImageSource>source, 0, 0, canvas.width, canvas.height);
     const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+
+    this.isDrawing = true;
 
     this.animationFrameId = requestAnimationFrame(() => {
       this.draw();
@@ -44,7 +54,9 @@ class VideoCanvas {
   stopDraw() {
     this.isDrawing = false;
 
-    cancelAnimationFrame(this.animationFrameId);
+    if (this.animationFrameId) {
+      cancelAnimationFrame(this.animationFrameId);
+    }
   }
 }
 

@@ -42,8 +42,6 @@ const audioAnalyser = new AudioAnalyser({
   visualizers: [volumeVisualizer],
 });
 
-audioAnalyser.init();
-
 const cameras = new Cameras({
   analysers: [
     audioAnalyser,

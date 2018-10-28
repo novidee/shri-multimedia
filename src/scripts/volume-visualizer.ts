@@ -1,11 +1,18 @@
-class AudioVisualizer {
+import { IVisualizer } from './abstractions/interfaces';
+
+class AudioVisualizer implements IVisualizer {
+  private readonly canvas: HTMLCanvasElement | null;
+  private readonly context: CanvasRenderingContext2D | null;
+
   constructor() {
     this.canvas = document.querySelector('#volume-analyser');
-    this.context = this.canvas.getContext('2d');
+    this.context = this.canvas && this.canvas.getContext('2d');
   }
 
-  visualize(data) {
+  visualize(data: Uint8Array) {
     const { canvas, context } = this;
+
+    if (!canvas || !context) return;
 
     const MAX_FREQUENCY = 255;
     const { width, height } = canvas;
