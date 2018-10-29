@@ -27,7 +27,7 @@ module.exports = (env, argv) => {
   ];
 
   return {
-    entry: `./${SOURCE_FOLDER}/scripts/index.js`,
+    entry: `./${SOURCE_FOLDER}/scripts/index.ts`,
     output: {
       path: path.resolve(__dirname, BUILD_FOLDER),
       filename: 'script.js'
@@ -35,9 +35,9 @@ module.exports = (env, argv) => {
     module: {
       rules: [
         {
-          test: /\.js$/,
+          test: /\.(ts|js)$/,
           exclude: /node_modules/,
-          loader: 'babel-loader'
+          loader: 'awesome-typescript-loader'
         },
         {
           test: /\.less$/,
@@ -54,6 +54,9 @@ module.exports = (env, argv) => {
           from: `${SOURCE_FOLDER}/index.html`
         }
       ])
-    ]
+    ],
+    resolve: {
+      extensions: ['.ts', '.js']
+    },
   };
 };
